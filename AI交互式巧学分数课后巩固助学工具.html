@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>分数的初步认识 | 学生端+教师端</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f9f3e6 0%, #fff4e8 100%);
+            font-family: 'Comic Neue', 'Segoe UI Emoji', 'Chalkboard SE', 'Comic Sans MS', cursive, sans-serif;
+            padding: 12px;
+            color: #2d3e50;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 248, 235, 0.85);
+            border-radius: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FFB347, #FF8C42);
+            padding: 16px 12px;
+            text-align: center;
+            color: white;
+            border-bottom: 4px solid #ffdd99;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 0 #c45c1b;
+            margin-bottom: 8px;
+        }
+
+        .mode-switch {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 12px 0 5px;
+        }
+        .mode-btn {
+            background-color: #ffdc97;
+            border: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 6px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: inherit;
+            color: #785c2c;
+            box-shadow: 0 2px 0 #c28a3e;
+            transition: 0.1s;
+        }
+        .mode-btn.active-mode {
+            background-color: #ff9f3d;
+            color: white;
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b45f1b;
+        }
+
+        .student-area-header {
+            background: #fff1df;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 50px;
+            margin: 10px 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .student-area-header label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #c45c1b;
+        }
+        #studentId {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 30px;
+            background: #fef9e6;
+            border: 2px solid #ffb85e;
+            font-family: inherit;
+            width: 150px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .export-btn {
+            background-color: #4c9f70;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 12px 0;
+            flex-wrap: wrap;
+            background: #fffaf0;
+        }
+        .module-btn {
+            background-color: #ffdc97;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: inherit;
+            color: #785c2c;
+            box-shadow: 0 3px 0 #c28a3e;
+            flex: 1 0 auto;
+            min-width: 100px;
+            text-align: center;
+        }
+        .module-btn.active {
+            background-color: #ff9f3d;
+            color: white;
+            box-shadow: 0 1px 0 #b45f1b;
+            transform: translateY(2px);
+        }
+
+        .content-panel, .teacher-panel {
+            display: none;
+            padding: 15px 12px 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        .content-panel.active, .teacher-panel.active {
+            display: block;
+        }
+
+        .section-card {
+            background: #ffffffd9;
+            border-radius: 32px;
+            margin-bottom: 20px;
+            padding: 16px;
+            border: 1px solid #ffe2b5;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            border-left: 12px solid #ffa559;
+            padding-left: 12px;
+            margin-bottom: 12px;
+            color: #e67e22;
+        }
+        .knowledge-area {
+            background: #FFF6E8;
+            border-radius: 28px;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+        .challenge-area {
+            background: #fff3e2;
+            border-radius: 28px;
+            padding: 14px;
+        }
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            font-weight: bold;
+        }
+        .fraction .top {
+            border-bottom: 2px solid #333;
+            padding: 0 6px;
+            font-size: 1.2rem;
+        }
+        .drag-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .graph-card {
+            background: #fdebd0;
+            border-radius: 24px;
+            padding: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 130px;
+        }
+        canvas {
+            background: #fef7e0;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            margin: 6px auto;
+            display: block;
+            border-radius: 0px;
+            max-width: 100%;
+            height: auto;
+        }
+        /* 手机适配canvas宽度 */
+        #circleCanvas, #rectCanvas, #squareCanvas {
+            width: 100%;
+            height: auto;
+        }
+        .slider-box {
+            background: #fff0e0;
+            padding: 10px;
+            border-radius: 28px;
+            margin-top: 10px;
+        }
+        input[type=range] {
+            width: 100%;
+            margin: 8px 0;
+        }
+        .quiz-item {
+            background: #fff5e8;
+            border-radius: 24px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+        .btn-submit, .difficulty-btn, .next-btn, .reset-btn, .teacher-import-btn {
+            background: #ffb35c;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 36px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin: 6px 4px 0 0;
+            cursor: pointer;
+        }
+        .teacher-import-btn { background-color: #4c9f70; color: white; }
+        .feedback { margin-top: 10px; font-weight: bold; font-size: 0.9rem; }
+        .teacher-stats { background: #e8d9c5; border-radius: 32px; padding: 16px; margin-top: 16px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff6e6;
+            border-radius: 20px;
+            overflow-x: auto;
+            display: block;
+            font-size: 0.75rem;
+        }
+        th, td {
+            border: 1px solid #f3ca9b;
+            padding: 6px;
+            text-align: center;
+        }
+        .download-btn {
+            background-color: #4c9f70;
+            color: white;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: none;
+            margin-top: 12px;
+            cursor: pointer;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 12px;
+            color: #936e3e;
+        }
+        .difficulty-row {
+            margin-top: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .current-diff-value {
+            font-size: 1.3rem;
+            color: #e67e22;
+            margin-left: 6px;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .module-btn { font-size: 0.85rem; padding: 6px 12px; min-width: 80px; }
+            .section-title { font-size: 1.2rem; }
+            .fraction .top, .fraction .bottom { font-size: 1rem; }
+            .quiz-item { padding: 10px; }
+            .btn-submit, .next-btn { padding: 6px 12px; font-size: 0.8rem; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🍕 分数的初步认识 🧁</h1>
+        <div class="mode-switch">
+            <button id="studentModeBtn" class="mode-btn active-mode">👩‍🎓 学生端</button>
+            <button id="teacherModeBtn" class="mode-btn">👩‍🏫 教师端</button>
+        </div>
+    </div>
+
+    <!-- 学生端视图 -->
+    <div id="studentView" style="display: block;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; background: #fffaf0; padding: 8px 12px;">
+            <div class="student-area-header" style="margin:0; flex:1; justify-content: flex-start;">
+                <label>🧑‍🎓 编号：</label>
+                <input type="text" id="studentId" value="S301">
+                <button id="exportReportBtn" class="export-btn">📤 报告</button>
+            </div>
+        </div>
+        <div class="nav-buttons">
+            <button class="module-btn active" data-module="basic">🔢 认识分数</button>
+            <button class="module-btn" data-module="calc">🧮 计算</button>
+            <button class="module-btn" data-module="deep">🌟 进阶</button>
+        </div>
+
+        <!-- 初步认识模块 -->
+        <div id="basicPanel" class="content-panel active">
+            <div class="section-card">
+                <div class="section-title">📖 分数变变变</div>
+                <div class="knowledge-area">
+                    <div class="drag-area">
+                        <div class="graph-card"><div>🍕 圆形</div><canvas id="circleCanvas" width="160" height="160"></canvas></div>
+                        <div class="graph-card"><div>🍫 长方形</div><canvas id="rectCanvas" width="200" height="100"></canvas></div>
+                        <div class="graph-card"><div>🧩 正方形</div><canvas id="squareCanvas" width="140" height="140"></canvas></div>
+                    </div>
+                    <div class="slider-box">
+                        <label>🔽 分子: <span id="numValue">1</span></label>
+                        <input type="range" id="numeratorSlider" min="0" max="1" step="1" value="1">
+                        <label>📏 分母 (2~20): <span id="denValue">8</span></label>
+                        <input type="range" id="denominatorSlider" min="2" max="20" step="1" value="8">
+                        <div style="font-size:1.3rem; text-align:center;">当前 = <span class="fraction"><span class="top" id="showNum">1</span><span class="bottom" id="showDen">8</span></span></div>
+                    </div>
+                </div>
+                <div class="challenge-area">
+                    <div class="section-title">🎯 比大小</div>
+                    <div class="quiz-item">
+                        <div id="compareQuestion" style="font-size:1.3rem; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+                            <span class="fraction"><span class="top" id="fracLeftNum">1</span><span class="bottom" id="fracLeftDen">4</span></span> ○
+                            <span class="fraction"><span class="top" id="fracRightNum">1</span><span class="bottom" id="fracRightDen">6</span></span>
+                        </div>
+                        <div>
+                            <button class="btn-submit" data-compare=">">大于 &gt;</button>
+                            <button class="btn-submit" data-compare="<">小于 &lt;</button>
+                            <button class="btn-submit" data-compare="=">等于 =</button>
+                            <button id="newCompareBtn" class="next-btn">新题</button>
+                        </div>
+                        <div id="compareFeedback" class="feedback"></div>
+                        <div>✅ 得分: <span id="basicCorrect">0</span> / <span id="basicTotal">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分数的简单计算模块 -->
+        <div id="calcPanel" class="content-panel">
+            <div class="section-card">
+                <div class="section-title">🧠 同分母加减法</div>
+                <div class="knowledge-area"><p>🎈 所有题目结果大于0且小于1（不会是0或1）</p></div>
+                <div class="challenge-area">
+                    <div><button class="difficulty-btn" data-diff="easy">🌱 简单 (≤8)</button>
+                         <button class="difficulty-btn" data-diff="medium">🍀 中等 (≤12)</button>
+                         <button class="difficulty-btn" data-diff="hard">🔥 困难 (≤20)</button>
+                         <span>当前难度: <strong id="currentDiff" class="current-diff-value">简单</strong></span>
+                    </div>
+                    <div class="quiz-item">
+                        <p id="calcQuestion" style="font-size:1.4rem; text-align:center;"></p>
+                        <div style="display:flex; gap:8px; justify-content:center; align-items:center;">
+                            <input type="number" id="calcAnswerNum" placeholder="分子" style="width:70px; padding:6px; border-radius:28px; text-align:center;">
+                            <span style="font-size:1.2rem;"> / </span>
+                            <span id="calcResultDen" style="font-size:1.2rem; font-weight:bold;">5</span>
+                        </div>
+                        <button id="submitCalc" class="btn-submit">提交</button>
+                        <button id="nextCalcBtn" class="next-btn">下一题</button>
+                        <div id="calcFeedback" class="feedback"></div>
+                        <div>📊 得分: <span id="calcCorrect">0</span> / <span id="calcTotal">0</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 进一步认识模块 -->
+        <div id="deepPanel" class="content-panel">
+            <div class="section-card">
+                <div class="section-title">📚 整体与部分 & 涂色</div>
+                <div class="knowledge-area"><p>⭐ 总数≤81且能被分母整除</p></div>
+                <div class="challenge-area">
+                    <div class="section-title">🧩 应用大闯关</div>
+                    <div class="quiz-item">
+                        <p id="deepQuestion" style="font-size:1rem;"></p>
+                        <input type="number" id="deepAnswer" placeholder="答案" style="padding:6px; border-radius:40px; width:100px;">
+                        <button id="submitDeep" class="btn-submit">提交</button>
+                        <button id="nextDeepBtn" class="next-btn">下一题</button>
+                        <div id="deepFeedback" class="feedback"></div>
+                    </div>
+                    <div class="section-title">🎨 涂色小画家</div>
+                    <div class="quiz-item">
+                        <p>🎯 目标: <strong id="targetFractionDisplay"><span class="fraction"><span class="top">2</span><span class="bottom">5</span></span></strong></p>
+                        <canvas id="coloringCanvas" width="280" height="80" style="width:100%; height:auto; border:2px solid #e2b87a; border-radius:0;"></canvas>
+                        <div>涂色: <span id="coloredCount">0</span> / <span id="totalParts">5</span></div>
+                        <button id="checkColoring" class="btn-submit">检查</button>
+                        <button id="resetColoring" class="reset-btn">重置</button>
+                        <button id="newColoringQuestion" class="next-btn">新题目</button>
+                        <div id="coloringFeedback" class="feedback"></div>
+                    </div>
+                    <div>🏆 进阶得分: <span id="deepCorrect">0</span> / <span id="deepTotal">0</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 教师端视图 -->
+    <div id="teacherView" style="display: none;">
+        <div class="section-card">
+            <div class="section-title">📊 全班数据汇总</div>
+            <div class="knowledge-area">
+                <p>✨ 导入学生JSON报告，汇总成绩</p>
+                <input type="file" id="teacherFileInput" multiple accept=".json" style="display:none;">
+                <button id="teacherImportBtn" class="teacher-import-btn">📂 导入学生数据</button>
+                <button id="teacherExportAllBtn" class="download-btn">📎 导出全班CSV</button>
+                <button id="teacherClearBtn" class="reset-btn">🗑️ 清空数据</button>
+            </div>
+            <div class="teacher-stats">
+                <h3>📋 全班成绩统计</h3>
+                <div style="overflow-x:auto;">
+                    <table id="teacherStatsTable">
+                        <thead><tr><th>学生编号</th><th>认识分数</th><th>简单计算</th><th>进一步认识</th><th>综合掌握率</th></tr></thead>
+                        <tbody id="teacherStatsBody"><tr><td colspan="5">暂无数据</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>⭐ 手机版 | 点击方格涂色 | 导出报告交给老师</footer>
+</div>
+
+<script>
+    // ================= 学生端数据存储 =================
+    let studentStats = {};
+    let currentStudent = "S301";
+
+    function loadStudentStorage() {
+        let saved = localStorage.getItem("fractionLearningStats");
+        if(saved) {
+            try { studentStats = JSON.parse(saved); } catch(e) { studentStats = {}; }
+        } else studentStats = {};
+        for(let sid in studentStats) {
+            let s = studentStats[sid];
+            if(!s.basic) s.basic = { correct:0, total:0 };
+            if(!s.calc) s.calc = { correct:0, total:0 };
+            if(!s.deep) s.deep = { correct:0, total:0 };
+        }
+        updateStudentUI();
+    }
+    function saveStudentStats() {
+        localStorage.setItem("fractionLearningStats", JSON.stringify(studentStats));
+        updateStudentUI();
+    }
+    function getCurrentStudentStats() {
+        if(!studentStats[currentStudent]) {
+            studentStats[currentStudent] = { basic:{correct:0,total:0}, calc:{correct:0,total:0}, deep:{correct:0,total:0} };
+        }
+        return studentStats[currentStudent];
+    }
+    function updateStudentUI() {
+        let cur = getCurrentStudentStats();
+        document.getElementById("basicCorrect").innerText = cur.basic.correct;
+        document.getElementById("basicTotal").innerText = cur.basic.total;
+        document.getElementById("calcCorrect").innerText = cur.calc.correct;
+        document.getElementById("calcTotal").innerText = cur.calc.total;
+        document.getElementById("deepCorrect").innerText = cur.deep.correct;
+        document.getElementById("deepTotal").innerText = cur.deep.total;
+    }
+    function recordStudentResult(module, isCorrect) {
+        let stats = getCurrentStudentStats();
+        stats[module].total += 1;
+        if(isCorrect) stats[module].correct += 1;
+        saveStudentStats();
+    }
+    function exportStudentReport() {
+        let sid = currentStudent;
+        let data = { studentId: sid, stats: studentStats[sid] };
+        if(!data.stats) data.stats = { basic:{correct:0,total:0}, calc:{correct:0,total:0}, deep:{correct:0,total:0} };
+        let jsonStr = JSON.stringify(data);
+        let blob = new Blob([jsonStr], {type: "application/json"});
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `分数报告_${sid}.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ================= 教师端数据处理 =================
+    let teacherData = {};
+    function loadTeacherDataFromLocal() {
+        let saved = localStorage.getItem("teacherClassData");
+        if(saved) {
+            try { teacherData = JSON.parse(saved); } catch(e) { teacherData = {}; }
+        } else teacherData = {};
+        renderTeacherTable();
+    }
+    function saveTeacherDataToLocal() {
+        localStorage.setItem("teacherClassData", JSON.stringify(teacherData));
+        renderTeacherTable();
+    }
+    function importTeacherFiles(files) {
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let json = JSON.parse(e.target.result);
+                    let sid = json.studentId;
+                    let stats = json.stats;
+                    if(sid && stats) {
+                        if(!teacherData[sid]) teacherData[sid] = {};
+                        teacherData[sid].basic = { correct: stats.basic?.correct || 0, total: stats.basic?.total || 0 };
+                        teacherData[sid].calc  = { correct: stats.calc?.correct || 0, total: stats.calc?.total || 0 };
+                        teacherData[sid].deep  = { correct: stats.deep?.correct || 0, total: stats.deep?.total || 0 };
+                        saveTeacherDataToLocal();
+                    } else alert(`文件 ${file.name} 格式错误`);
+                } catch(err) { alert(`解析失败: ${file.name}`); }
+            };
+            reader.readAsText(file);
+        });
+    }
+    function renderTeacherTable() {
+        let tbody = document.getElementById("teacherStatsBody");
+        tbody.innerHTML = "";
+        if(Object.keys(teacherData).length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">暂无数据，请导入学生报告</td></tr>';
+            return;
+        }
+        for(let sid in teacherData) {
+            let s = teacherData[sid];
+            let basicStr = `${s.basic.correct}/${s.basic.total}`;
+            let calcStr  = `${s.calc.correct}/${s.calc.total}`;
+            let deepStr  = `${s.deep.correct}/${s.deep.total}`;
+            let basicRate = s.basic.total ? (s.basic.correct / s.basic.total)*100 : 0;
+            let calcRate  = s.calc.total  ? (s.calc.correct / s.calc.total)*100 : 0;
+            let deepRate  = s.deep.total  ? (s.deep.correct / s.deep.total)*100 : 0;
+            let overall = ((basicRate + calcRate + deepRate)/3).toFixed(1);
+            tbody.innerHTML += `<tr>
+                <td>${sid}</td>
+                <td>${basicStr}</td>
+                <td>${calcStr}</td>
+                <td>${deepStr}</td>
+                <td>${overall}%</td>
+            </tr>`;
+        }
+    }
+    function exportTeacherCSV() {
+        let rows = [["学生编号","认识分数(正确/总数)","简单计算(正确/总数)","进一步认识(正确/总数)","综合掌握率(%)"]];
+        for(let sid in teacherData) {
+            let s = teacherData[sid];
+            rows.push([sid, `${s.basic.correct}/${s.basic.total}`, `${s.calc.correct}/${s.calc.total}`, `${s.deep.correct}/${s.deep.total}`,
+                (( (s.basic.total? (s.basic.correct/s.basic.total)*100:0) + (s.calc.total? (s.calc.correct/s.calc.total)*100:0) + (s.deep.total? (s.deep.correct/s.deep.total)*100:0) )/3).toFixed(1)+"%"]);
+        }
+        let csvContent = rows.map(row => row.join(",")).join("\n");
+        let blob = new Blob(["\uFEFF" + csvContent], {type: "text/csv;charset=utf-8;"});
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `全班成绩_${new Date().toISOString().slice(0,19)}.csv`;
+        link.click();
+    }
+    function clearTeacherData() {
+        if(confirm("清空所有学生数据？")) { teacherData = {}; saveTeacherDataToLocal(); renderTeacherTable(); }
+    }
+
+    // ================= 学生端所有功能实现 =================
+    // 图形绘制
+    const numSlider = document.getElementById("numeratorSlider");
+    const denSlider = document.getElementById("denominatorSlider");
+    const numSpan = document.getElementById("numValue");
+    const denSpan = document.getElementById("denValue");
+    const showNumSpan = document.getElementById("showNum");
+    const showDenSpan = document.getElementById("showDen");
+    function updateNumMax() { let den = parseInt(denSlider.value); let maxNum = den-1; numSlider.max = maxNum; let cur=parseInt(numSlider.value); if(cur>maxNum) numSlider.value=maxNum; enforceFraction(); }
+    function enforceFraction() { let num=parseInt(numSlider.value); let den=parseInt(denSlider.value); if(num>=den) { num=den-1; numSlider.value=num; } numSpan.innerText=num; denSpan.innerText=den; showNumSpan.innerText=num; showDenSpan.innerText=den; drawAll(num,den); }
+    function drawAll(n,d){ drawCircle(n,d); drawRect(n,d); drawSquare(n,d); }
+    function drawCircle(n,d){ let c=document.getElementById("circleCanvas"), ctx=c.getContext("2d"), w=160,h=160; c.width=w;c.height=h; ctx.clearRect(0,0,w,h); let cx=w/2,cy=h/2,r=70; ctx.fillStyle="#FFF1BF"; ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.fill(); ctx.stroke(); if(d<=0) return; let step=Math.PI*2/d; for(let i=0;i<n;i++){ ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,i*step,(i+1)*step); ctx.fillStyle="#FFB781"; ctx.fill(); } ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.stroke(); }
+    function drawRect(n,d){ let c=document.getElementById("rectCanvas"), ctx=c.getContext("2d"), w=200,h=100; c.width=w;c.height=h; ctx.clearRect(0,0,w,h); ctx.fillStyle="#FFE3B5"; ctx.fillRect(0,0,w,h); let sw=w/d; for(let i=0;i<n;i++){ ctx.fillStyle="#FFA559"; ctx.fillRect(i*sw,0,sw,h); } ctx.strokeStyle="#d98c2b"; for(let i=0;i<=d;i++){ ctx.beginPath(); ctx.moveTo(i*sw,0); ctx.lineTo(i*sw,h); ctx.stroke(); } }
+    function drawSquare(n,d){ let c=document.getElementById("squareCanvas"), ctx=c.getContext("2d"), s=140; c.width=s;c.height=s; ctx.clearRect(0,0,s,s); ctx.fillStyle="#FBE5BF"; ctx.fillRect(0,0,s,s); let pw=s/d; for(let i=0;i<n;i++){ ctx.fillStyle="#FEA47F"; ctx.fillRect(i*pw,0,pw,s); } ctx.strokeStyle="#c97e2a"; for(let i=0;i<=d;i++){ ctx.beginPath(); ctx.moveTo(i*pw,0); ctx.lineTo(i*pw,s); ctx.stroke(); } }
+    denSlider.addEventListener("input",updateNumMax);
+    numSlider.addEventListener("input",enforceFraction);
+    updateNumMax(); enforceFraction();
+
+    // 比大小
+    let currentCompare = {left:{n:1,d:4}, right:{n:1,d:6}, correctSymbol:">"};
+    function genCompare(){
+        let type=Math.random()<0.5?"sameDen":"sameNum";
+        let l,r,sym;
+        if(type=="sameDen"){
+            let den=Math.floor(Math.random()*8)+2;
+            let n1=Math.floor(Math.random()*(den-1))+1;
+            let n2=Math.floor(Math.random()*(den-1))+1;
+            while(n1===n2) n2=Math.floor(Math.random()*(den-1))+1;
+            l={n:n1,d:den}; r={n:n2,d:den}; sym=n1>n2?">":"<";
+        } else {
+            let num=Math.floor(Math.random()*5)+1;
+            let d1=Math.floor(Math.random()*8)+2+num;
+            let d2=Math.floor(Math.random()*8)+2+num;
+            while(d1===d2) d2=Math.floor(Math.random()*8)+2+num;
+            l={n:num,d:d1}; r={n:num,d:d2}; sym=d1<d2?">":"<";
+        }
+        currentCompare={left:l,right:r,correctSymbol:sym};
+        document.getElementById("fracLeftNum").innerText=l.n; document.getElementById("fracLeftDen").innerText=l.d;
+        document.getElementById("fracRightNum").innerText=r.n; document.getElementById("fracRightDen").innerText=r.d;
+    }
+    function checkCompare(sel){
+        let ok=(sel===currentCompare.correctSymbol);
+        recordStudentResult("basic",ok);
+        let fb=document.getElementById("compareFeedback");
+        fb.innerHTML=ok?"🎉正确！":`❌正确答案是 ${currentCompare.correctSymbol}`;
+        updateStudentUI();
+        setTimeout(()=>{ genCompare(); fb.innerHTML="新题目～"; },1000);
+    }
+    document.querySelectorAll("[data-compare]").forEach(btn=>btn.addEventListener("click",e=>checkCompare(e.target.dataset.compare)));
+    document.getElementById("newCompareBtn").addEventListener("click",()=>{ genCompare(); document.getElementById("compareFeedback").innerHTML="新题目！"; });
+    genCompare();
+
+    // 简单计算 (无0/1)
+    let currentDiffCalc="easy", currentCalcQ=null;
+    function getMaxDenCalc(){ return currentDiffCalc==="easy"?8:(currentDiffCalc==="medium"?12:20); }
+    function generateSafeCalc(){
+        let maxDen=getMaxDenCalc();
+        if(Math.random()<0.3){
+            let den=Math.floor(Math.random()*(maxDen-1))+2;
+            let n2=Math.floor(Math.random()*(den-1))+1;
+            let ans=den-n2;
+            return {type:"oneMinus", den, n2, ans};
+        } else {
+            let den=Math.floor(Math.random()*(maxDen-1))+2;
+            let n1=Math.floor(Math.random()*(den-1))+1;
+            let op=Math.random()>0.5?"+":"-";
+            if(op==="+"){
+                let maxN2=den-n1-1;
+                if(maxN2<=0) return generateSafeCalc();
+                let n2=Math.floor(Math.random()*maxN2)+1;
+                return {type:"add", den, n1, n2, ans:n1+n2};
+            } else {
+                if(n1===1) return generateSafeCalc();
+                let n2=Math.floor(Math.random()*(n1-1))+1;
+                return {type:"sub", den, n1, n2, ans:n1-n2};
+            }
+        }
+    }
+    function renderCalcQuestion(){
+        currentCalcQ = generateSafeCalc();
+        let q=currentCalcQ;
+        if(q.type==="oneMinus") document.getElementById("calcQuestion").innerHTML=`1 - <span class="fraction"><span class="top">${q.n2}</span><span class="bottom">${q.den}</span></span> = ?`;
+        else document.getElementById("calcQuestion").innerHTML=`<span class="fraction"><span class="top">${q.n1}</span><span class="bottom">${q.den}</span></span> ${q.type==="add"?"+":"-"} <span class="fraction"><span class="top">${q.n2}</span><span class="bottom">${q.den}</span></span> = ?`;
+        document.getElementById("calcResultDen").innerText = q.den;
+        document.getElementById("calcAnswerNum").value="";
+    }
+    document.querySelectorAll(".difficulty-btn").forEach(btn=>btn.addEventListener("click",(e)=>{
+        currentDiffCalc=e.target.dataset.diff;
+        let txt=currentDiffCalc==="easy"?"简单":(currentDiffCalc==="medium"?"中等":"困难");
+        document.getElementById("currentDiff").innerText=txt;
+        renderCalcQuestion();
+    }));
+    document.getElementById("submitCalc").addEventListener("click",()=>{
+        let user=parseInt(document.getElementById("calcAnswerNum").value);
+        let correct=(user===currentCalcQ.ans);
+        recordStudentResult("calc",correct);
+        let fb=document.getElementById("calcFeedback");
+        fb.innerHTML=correct?"✔️正确！":`❌正确答案 ${currentCalcQ.ans}/${currentCalcQ.den}`;
+        updateStudentUI();
+        setTimeout(()=>{ renderCalcQuestion(); fb.innerHTML=""; },1000);
+    });
+    document.getElementById("nextCalcBtn").addEventListener("click",()=>{ renderCalcQuestion(); document.getElementById("calcFeedback").innerHTML=""; });
+    renderCalcQuestion();
+
+    // 应用大闯关 (总数≤81且整除)
+    let currentDeepQ = {total:24, numerator:3, denominator:8, answer:9};
+    function genDeep() {
+        let denominator = Math.floor(Math.random() * 8) + 2; // 2~9
+        let maxMultiple = Math.floor(81 / denominator);
+        if (maxMultiple < 2) maxMultiple = 2;
+        let multiple = Math.floor(Math.random() * (maxMultiple - 1)) + 2;
+        let total = denominator * multiple;
+        let numerator = Math.floor(Math.random() * (denominator - 1)) + 1;
+        let answer = (total / denominator) * numerator;
+        currentDeepQ = {total, numerator, denominator, answer};
+        document.getElementById("deepQuestion").innerHTML = `📌 有 ${total} 个物品，其中 <span class="fraction"><span class="top">${numerator}</span><span class="bottom">${denominator}</span></span> 是奖品，奖品有多少个？`;
+        document.getElementById("deepAnswer").value = "";
+    }
+    document.getElementById("submitDeep").addEventListener("click",()=>{
+        let val = parseInt(document.getElementById("deepAnswer").value);
+        let ok = (val === currentDeepQ.answer);
+        recordStudentResult("deep", ok);
+        let fb = document.getElementById("deepFeedback");
+        fb.innerHTML = ok ? "🎯 正确！" : `😥 正确答案 ${currentDeepQ.answer}`;
+        updateStudentUI();
+        setTimeout(()=>{ genDeep(); fb.innerHTML = ""; }, 1000);
+    });
+    document.getElementById("nextDeepBtn").addEventListener("click",()=>{ genDeep(); document.getElementById("deepFeedback").innerHTML = ""; });
+    genDeep();
+
+    // 涂色小画家
+    let coloringCanvas=document.getElementById("coloringCanvas"), ctxCol=coloringCanvas.getContext("2d");
+    let currentColoring={denominator:5,targetNumerator:2,colored:[]};
+    function initColoring(den){ currentColoring.colored=new Array(den).fill(false); updateColoringDisplay(); }
+    function updateColoringDisplay(){
+        let den=currentColoring.denominator, w=coloringCanvas.width=280, h=80; ctxCol.clearRect(0,0,w,h);
+        let sw=w/den;
+        for(let i=0;i<den;i++){
+            ctxCol.fillStyle=currentColoring.colored[i]?"#FFA559":"#FEF3E2";
+            ctxCol.fillRect(i*sw,0,sw,h);
+            ctxCol.strokeStyle="#c97e2a"; ctxCol.strokeRect(i*sw,0,sw,h);
+        }
+        document.getElementById("coloredCount").innerText=currentColoring.colored.filter(v=>v).length;
+        document.getElementById("totalParts").innerText=den;
+    }
+    function newColoring(){
+        let den=Math.floor(Math.random()*7)+2;
+        let tar=Math.floor(Math.random()*(den-1))+1;
+        currentColoring={denominator:den, targetNumerator:tar, colored:[]};
+        initColoring(den);
+        document.getElementById("targetFractionDisplay").innerHTML=`<span class="fraction"><span class="top">${tar}</span><span class="bottom">${den}</span></span>`;
+        document.getElementById("coloringFeedback").innerHTML="";
+    }
+    coloringCanvas.addEventListener("click",(e)=>{
+        let rect=coloringCanvas.getBoundingClientRect(), scale=coloringCanvas.width/rect.width;
+        let x=(e.clientX-rect.left)*scale, sw=coloringCanvas.width/currentColoring.denominator;
+        let idx=Math.floor(x/sw);
+        if(idx>=0 && idx<currentColoring.denominator){
+            currentColoring.colored[idx]=!currentColoring.colored[idx];
+            updateColoringDisplay();
+        }
+    });
+    document.getElementById("resetColoring").addEventListener("click",()=>{ initColoring(currentColoring.denominator); document.getElementById("coloringFeedback").innerHTML=""; });
+    document.getElementById("checkColoring").addEventListener("click",()=>{
+        let cnt=currentColoring.colored.filter(v=>v).length;
+        let ok=(cnt===currentColoring.targetNumerator);
+        recordStudentResult("deep",ok);
+        let fb=document.getElementById("coloringFeedback");
+        if(ok){ fb.innerHTML="🎉涂色正确！"; setTimeout(()=>{ newColoring(); fb.innerHTML=""; },1200); }
+        else fb.innerHTML=`😲需要 ${currentColoring.targetNumerator} 个涂色`;
+        updateStudentUI();
+    });
+    document.getElementById("newColoringQuestion").addEventListener("click",()=>{ newColoring(); document.getElementById("coloringFeedback").innerHTML=""; });
+    newColoring();
+
+    // 学生端编号变更 & 导出
+    document.getElementById("studentId").addEventListener("change",function(e){
+        currentStudent=e.target.value.trim()||"匿名";
+        loadStudentStorage();
+    });
+    document.getElementById("exportReportBtn").addEventListener("click",exportStudentReport);
+
+    // 教师端事件绑定
+    document.getElementById("teacherImportBtn").addEventListener("click",()=>{ document.getElementById("teacherFileInput").click(); });
+    document.getElementById("teacherFileInput").addEventListener("change",(e)=>{ if(e.target.files.length) importTeacherFiles(e.target.files); });
+    document.getElementById("teacherExportAllBtn").addEventListener("click",exportTeacherCSV);
+    document.getElementById("teacherClearBtn").addEventListener("click",clearTeacherData);
+
+    // 模式切换
+    const studentModeBtn=document.getElementById("studentModeBtn"), teacherModeBtn=document.getElementById("teacherModeBtn");
+    const studentView=document.getElementById("studentView"), teacherView=document.getElementById("teacherView");
+    studentModeBtn.addEventListener("click",()=>{
+        studentModeBtn.classList.add("active-mode"); teacherModeBtn.classList.remove("active-mode");
+        studentView.style.display="block"; teacherView.style.display="none";
+    });
+    teacherModeBtn.addEventListener("click",()=>{
+        teacherModeBtn.classList.add("active-mode"); studentModeBtn.classList.remove("active-mode");
+        studentView.style.display="none"; teacherView.style.display="block";
+        loadTeacherDataFromLocal();
+    });
+
+    // 学生端模块切换
+    const modBtns = document.querySelectorAll(".module-btn");
+    const panelsMap = { basic: document.getElementById("basicPanel"), calc: document.getElementById("calcPanel"), deep: document.getElementById("deepPanel") };
+    modBtns.forEach(btn=>{
+        btn.addEventListener("click",()=>{
+            let mod=btn.dataset.module;
+            modBtns.forEach(b=>b.classList.remove("active"));
+            btn.classList.add("active");
+            Object.values(panelsMap).forEach(p=>p.classList.remove("active"));
+            panelsMap[mod].classList.add("active");
+            if(mod==="basic") drawAll(parseInt(numSlider.value),parseInt(denSlider.value));
+            if(mod==="calc") renderCalcQuestion();
+            if(mod==="deep") { genDeep(); newColoring(); }
+        });
+    });
+
+    loadStudentStorage();
+    loadTeacherDataFromLocal();
+</script>
+</body>
+</html>
